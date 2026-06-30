@@ -75,7 +75,7 @@ const AdminProfile = () => {
 
   const permissions = [
     { key: 'user_management', label: 'User Management', description: 'Create, edit, and delete user accounts' },
-    { key: 'property_management', label: 'Property Management', description: 'Manage all properties and listings' },
+    { key: 'property_management', label: 'Property Management System', description: 'Manage all properties and listings' },
     { key: 'system_settings', label: 'System Settings', description: 'Configure platform settings and preferences' },
     { key: 'analytics', label: 'Analytics & Reports', description: 'Access to all analytics and reporting features' },
     { key: 'billing', label: 'Billing Management', description: 'Manage billing and payment systems' },

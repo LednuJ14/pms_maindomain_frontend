@@ -2,8 +2,8 @@ import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import ManagerInquiries from './Inquiries';
 import api from '../../services/api';
 import API_BASE_URL from '../../config/api';
-import defaultProperty from '../../assets/images/default_property.png';
-import defaultUnit from '../../assets/images/default_unit.png';
+const defaultProperty = 'https://res.cloudinary.com/do6wjhqur/image/upload/v1782797109/default_property-C1acxcEH_e5dve8.png';
+const defaultUnit = 'https://res.cloudinary.com/do6wjhqur/image/upload/v1782797091/default_unit-BwbxJJFV_vjtpst.png';
 
 const statusToBadgeClass = {
   Vacant: 'bg-green-100 text-green-800 border-green-200',
@@ -1029,12 +1029,15 @@ const ManagerRentSpace = ({ onPageChange = () => {} }) => {
             onClick={() => handlePropertyClick(property)}
           >
             {/* Property Image */}
-            <div className="relative h-60 bg-gray-200 overflow-hidden">
+            <div className="relative h-60 bg-gray-100 flex items-center justify-center overflow-hidden">
               <img
                 src={property.image && property.image.trim() !== '' ? property.image : defaultProperty}
                 alt={property.name}
-                className="w-full h-full object-cover"
-                onError={(e) => { e.target.src = defaultProperty; }}
+                className={`w-full h-full ${(!property.image || property.image.trim() === '') ? 'object-contain p-12 opacity-30' : 'object-cover'}`}
+                onError={(e) => { 
+                  e.target.src = defaultProperty; 
+                  e.target.className = "w-full h-full object-contain p-12 opacity-30"; 
+                }}
               />
               <div className="absolute top-3 right-3">
                 <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-200">
@@ -1511,12 +1514,20 @@ const ManagerRentSpace = ({ onPageChange = () => {} }) => {
             <div key={listing.id} className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300">
               {/* Unit Image */}
               <div className="relative h-60 bg-gray-200 overflow-hidden">
-                <img
-                  src={normalizeImageUrl(listing.images?.[0] ?? listing.image) || defaultUnit}
-                  alt={listing.unitName}
-                  className="w-full h-full object-cover"
-                  onError={(e) => { e.target.src = defaultUnit; }}
-                />
+                {(() => {
+                  const mainImg = normalizeImageUrl(listing.images?.[0] ?? listing.image) || defaultUnit;
+                  return (
+                    <img
+                      src={mainImg}
+                      alt={listing.unitName}
+                      className={`w-full h-full ${mainImg === defaultUnit ? 'object-contain p-12 opacity-30 bg-white' : 'object-cover'}`}
+                      onError={(e) => { 
+                        e.target.src = defaultUnit; 
+                        e.target.className = "w-full h-full object-contain p-12 opacity-30 bg-white";
+                      }}
+                    />
+                  );
+                })()}
                 <div className="absolute top-3 left-3">
                   <input
                     type="checkbox"
@@ -1561,8 +1572,8 @@ const ManagerRentSpace = ({ onPageChange = () => {} }) => {
                   </div>
                   <div className="text-center">
                     <p className="text-sm text-gray-500">Bathrooms</p>
-                    <p className="font-semibold text-gray-900">
-                      {listing.bathrooms === 'own' ? 'Own' : listing.bathrooms === 'share' ? 'Share' : listing.bathrooms}
+                    <p className="font-semibold text-gray-900 capitalize">
+                      {String(listing.bathrooms).toLowerCase() === 'own' ? 'Own' : String(listing.bathrooms).toLowerCase() === 'share' ? 'Share' : listing.bathrooms}
                     </p>
                   </div>
                   <div className="text-center">
@@ -1686,10 +1697,11 @@ const ManagerRentSpace = ({ onPageChange = () => {} }) => {
                       <div>
                         <label className="block text-sm font-semibold text-gray-700 mb-2">Bedrooms</label>
                         <select
-                          value={newSpace.bedrooms}
-                          onChange={(e) => handleInputChange('bedrooms', e.target.value)}
+                          value={newSpace.bedrooms !== undefined ? newSpace.bedrooms : 0}
+                          onChange={(e) => handleInputChange('bedrooms', parseInt(e.target.value))}
                           className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200"
                         >
+                          <option value={0}>0 Bedrooms (Studio/Dorm)</option>
                           <option value={1}>1 Bedroom</option>
                           <option value={2}>2 Bedrooms</option>
                           <option value={3}>3+ Bedrooms</option>
@@ -1989,8 +2001,11 @@ const ManagerRentSpace = ({ onPageChange = () => {} }) => {
                       <img
                         src={currentSrc}
                         alt={previewListing.unitName}
-                            className="w-full h-full object-cover"
-                        onError={(e) => { e.target.src = defaultUnit; }}
+                        className={`w-full h-full ${currentSrc === defaultUnit ? 'object-contain p-12 opacity-30 bg-white' : 'object-cover'}`}
+                        onError={(e) => { 
+                          e.target.src = defaultUnit; 
+                          e.target.className = "w-full h-full object-contain p-12 opacity-30 bg-white";
+                        }}
                       />
                           {total > 1 && (
                             <>
@@ -2095,7 +2110,7 @@ const ManagerRentSpace = ({ onPageChange = () => {} }) => {
                   </div>
                     <div className="bg-white border border-gray-200 rounded-xl p-4 text-center">
                       <div className="text-2xl font-bold text-gray-900">
-                        {previewListing.bathrooms === 'own' ? 'Own' : previewListing.bathrooms === 'share' ? 'Share' : previewListing.bathrooms || 'N/A'}
+                        {String(previewListing.bathrooms).toLowerCase() === 'own' ? 'Own' : String(previewListing.bathrooms).toLowerCase() === 'share' ? 'Share' : previewListing.bathrooms || 'N/A'}
                     </div>
                       <div className="text-xs text-gray-500 mt-1">Bathroom</div>
                   </div>
@@ -2147,7 +2162,7 @@ const ManagerRentSpace = ({ onPageChange = () => {} }) => {
                   </h3>
                   <div className="bg-white rounded-xl p-4 border border-gray-200">
                     <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
-                      {previewListing.description || `A comfortable ${previewListing.bedrooms || 0}-bedroom unit with ${previewListing.bathrooms === 'own' ? 'own' : previewListing.bathrooms === 'share' ? 'shared' : previewListing.bathrooms || 'N/A'} bathroom spanning ${previewListing.sizeSqm || 0} square meters. This well-designed space offers modern living with ${previewListing.parkingSpaces || 0} parking space${previewListing.parkingSpaces !== 1 ? 's' : ''} and is located on ${previewListing.floorNumber ? `floor ${previewListing.floorNumber}` : 'an unspecified floor'}. Perfect for ${previewListing.bedrooms === 1 ? 'individuals or couples' : 'families or roommates'} seeking quality accommodation.`}
+                      {previewListing.description || `A comfortable ${previewListing.bedrooms || 0}-bedroom unit with ${String(previewListing.bathrooms).toLowerCase() === 'own' ? 'own' : String(previewListing.bathrooms).toLowerCase() === 'share' ? 'shared' : previewListing.bathrooms || 'N/A'} bathroom spanning ${previewListing.sizeSqm || 0} square meters. This well-designed space offers modern living with ${previewListing.parkingSpaces || 0} parking space${previewListing.parkingSpaces !== 1 ? 's' : ''} and is located on ${previewListing.floorNumber ? `floor ${previewListing.floorNumber}` : 'an unspecified floor'}. Perfect for ${previewListing.bedrooms === 1 ? 'individuals or couples' : 'families or roommates'} seeking quality accommodation.`}
                     </p>
                 </div>
               </div>
@@ -2315,10 +2330,11 @@ const ManagerRentSpace = ({ onPageChange = () => {} }) => {
                       <div>
                         <label className="block text-sm font-semibold text-gray-700 mb-2">Bedrooms</label>
                         <select
-                          value={editingListing.bedrooms}
+                          value={editingListing.bedrooms !== undefined ? editingListing.bedrooms : 0}
                           onChange={(e) => setEditingListing({...editingListing, bedrooms: parseInt(e.target.value)})}
                           className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200"
                         >
+                          <option value={0}>0 Bedrooms (Studio/Dorm)</option>
                           <option value={1}>1 Bedroom</option>
                           <option value={2}>2 Bedrooms</option>
                           <option value={3}>3+ Bedrooms</option>
@@ -2327,7 +2343,7 @@ const ManagerRentSpace = ({ onPageChange = () => {} }) => {
                       <div>
                         <label className="block text-sm font-semibold text-gray-700 mb-2">Bathroom</label>
                         <select
-                          value={editingListing.bathrooms}
+                          value={String(editingListing.bathrooms || 'own').toLowerCase()}
                           onChange={(e) => setEditingListing({...editingListing, bathrooms: e.target.value})}
                           className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200"
                         >

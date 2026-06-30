@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState, useCallback, memo } from 'react';
 import api from '../../services/api';
 import { getImageUrl } from '../../config/api';
-import defaultProfile from '../../assets/images/default_profile.png';
+const defaultProfile = 'https://res.cloudinary.com/do6wjhqur/image/upload/v1782797118/default_profile-vTumSY3j_faczsp.png';
 import TenantContractModal from './ContractModal';
 
 /**

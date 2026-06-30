@@ -102,8 +102,8 @@ const ForgotPassword = ({ onBackToLogin }) => {
                   </svg>
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold text-white">JACS</h1>
-                  <p className="text-sm text-gray-300">Property Management</p>
+                  <h1 className="text-2xl font-bold text-white">PMS</h1>
+                  <p className="text-sm text-gray-300">Property Management System</p>
                 </div>
               </div>
             </div>

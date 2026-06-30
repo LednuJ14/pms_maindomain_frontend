@@ -39,7 +39,7 @@ const AboutContact = () => {
         {/* Hero Section */}
         <div className="text-center mb-16">
           <h1 className="text-4xl md:text-5xl font-black text-gray-900 mb-6">
-            About <span className="text-black">JACS</span>
+            About <span className="text-black">PMS</span>
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
             Joint Association & Community System - Connecting communities through innovative rental solutions and fostering meaningful relationships between property managers and tenants.
@@ -51,7 +51,7 @@ const AboutContact = () => {
           <div className="space-y-6">
             <h2 className="text-3xl font-bold text-gray-900">Our Mission</h2>
             <p className="text-gray-600 leading-relaxed">
-              At JACS, we believe that finding the perfect rental space should be seamless and transparent. 
+              At PMS, we believe that finding the perfect rental space should be seamless and transparent. 
               Our platform bridges the gap between property managers and tenants, creating a community-driven 
               approach to rental management.
             </p>
@@ -131,7 +131,7 @@ const AboutContact = () => {
           <div className="space-y-8">
             <h2 className="text-3xl font-bold text-gray-900">Get in Touch</h2>
             <p className="text-gray-600 leading-relaxed">
-              Have questions about our platform? Want to learn more about how JACS can help you? 
+              Have questions about our platform? Want to learn more about how PMS can help you? 
               We'd love to hear from you. Reach out to us through any of the channels below.
             </p>
 
@@ -144,8 +144,8 @@ const AboutContact = () => {
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-1">Email Us</h3>
-                  <p className="text-gray-600">info@jacs.com</p>
-                  <p className="text-gray-600">support@jacs.com</p>
+                  <p className="text-gray-600">info@pms.com</p>
+                  <p className="text-gray-600">support@pms.com</p>
                 </div>
               </div>
 
@@ -284,7 +284,7 @@ const AboutContact = () => {
           <div className="bg-black text-white rounded-2xl p-8 md:p-12">
             <h2 className="text-2xl md:text-3xl font-bold mb-4">Ready to Get Started?</h2>
             <p className="text-gray-300 mb-6 max-w-2xl mx-auto">
-              Join thousands of satisfied tenants and property managers who trust JACS for their rental needs.
+              Join thousands of satisfied tenants and property managers who trust PMS for their rental needs.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button className="bg-white text-black px-8 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-all duration-200">

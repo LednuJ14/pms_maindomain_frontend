@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import api from '../../services/api';
 import { getImageUrl } from '../../config/api';
-import defaultProfile from '../../assets/images/default_profile.png';
+const defaultProfile = 'https://res.cloudinary.com/do6wjhqur/image/upload/v1782797118/default_profile-vTumSY3j_faczsp.png';
 import ContractModal from './ContractModal';
 
 const Inquiries = ({ isOpen, onClose }) => {
@@ -57,7 +57,7 @@ const Inquiries = ({ isOpen, onClose }) => {
     }
     
     // Production
-    const baseDomain = process.env.REACT_APP_PORTAL_BASE_DOMAIN || 'jacs.com';
+    const baseDomain = process.env.REACT_APP_PORTAL_BASE_DOMAIN || 'pms.com';
     const protocol = process.env.REACT_APP_PORTAL_PROTOCOL || 'https';
     return `${protocol}://${cleanSubdomain}.${baseDomain}`;
   };

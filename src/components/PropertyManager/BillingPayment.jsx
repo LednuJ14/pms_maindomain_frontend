@@ -818,7 +818,7 @@ const BillingPayment = () => {
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-sm text-yellow-800">
               <p className="font-semibold mb-1">Payment Instructions</p>
               <ul className="list-disc ml-5 space-y-1">
-                <li>GCash: 09XXXXXXXXX (Account Name: JACS Platform)</li>
+                <li>GCash: 09XXXXXXXXX (Account Name: PMS Platform)</li>
                 <li>Bank Transfer: ABC Bank, Account #######, Jun P.</li>
                 <li>
                   Amount: ₱{

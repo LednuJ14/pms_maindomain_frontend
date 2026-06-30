@@ -121,12 +121,11 @@ function App() {
                                   (Number(monthlyPrice) === 0);
                 
                 if (isFreePlan) {
-                  logger.debug('User is on Free Plan, showing upgrade modal');
-                  // Always show modal on page load/refresh for Free Plan users
-                  // Clear any previous dismissal to ensure it shows
-                  const dismissedKey = `upgrade_modal_dismissed_${subscription?.id || 'none'}`;
-                  sessionStorage.removeItem(dismissedKey);
-                  setShowUpgradeModal(true);
+                  const wasDismissed = sessionStorage.getItem('upgrade_modal_dismissed');
+                  if (!wasDismissed) {
+                    logger.debug('User is on Free Plan and modal not dismissed, showing modal');
+                    setShowUpgradeModal(true);
+                  }
                 } else {
                   logger.debug('User is not on Free Plan, plan:', planName);
                 }
@@ -207,14 +206,12 @@ function App() {
             
             if (isNewLogin) {
               // New login detected - show modal and clear any previous dismissal
-              const dismissedKey = `upgrade_modal_dismissed_${subscription?.id || 'none'}`;
-              sessionStorage.removeItem(dismissedKey);
+              sessionStorage.removeItem('upgrade_modal_dismissed');
               logger.debug('New login detected, showing modal');
               setShowUpgradeModal(true);
             } else {
               // Same session - check if modal was dismissed
-              const dismissedKey = `upgrade_modal_dismissed_${subscription?.id || 'none'}`;
-              const wasDismissed = sessionStorage.getItem(dismissedKey);
+              const wasDismissed = sessionStorage.getItem('upgrade_modal_dismissed');
               
               if (!wasDismissed) {
                 logger.debug('Modal not dismissed, showing modal');
@@ -227,9 +224,7 @@ function App() {
             // User has upgraded, hide modal and clear dismissal flag
             logger.debug('User is not on Free Plan, hiding modal');
             setShowUpgradeModal(false);
-            if (subscription?.id) {
-              sessionStorage.removeItem(`upgrade_modal_dismissed_${subscription.id}`);
-            }
+            sessionStorage.removeItem('upgrade_modal_dismissed');
           }
         } catch (error) {
           console.error('Error checking subscription:', error);
@@ -265,11 +260,7 @@ function App() {
       localStorage.removeItem('user_id');
       
       // Clear sessionStorage dismissal flags
-      Object.keys(sessionStorage).forEach(key => {
-        if (key.startsWith('upgrade_modal_dismissed_')) {
-          sessionStorage.removeItem(key);
-        }
-      });
+      sessionStorage.removeItem('upgrade_modal_dismissed');
       
       setIsAuthenticated(false);
       setCurrentPage('dashboard');
@@ -403,14 +394,8 @@ function App() {
     return (
       <SignUp
         onSignUpSuccess={({ role, email }) => {
-          // For tenants and managers, redirect to email verification pending page
-          if (role && (role.toLowerCase() === 'tenant' || role.toLowerCase() === 'manager')) {
-            setPendingVerificationEmail(email);
-            setCurrentPage('email-verification-pending');
-          } else {
-            // For admins, redirect to login (no email verification required)
-            setCurrentPage('login');
-          }
+          // Email verification is disabled, redirect everyone to login directly
+          setCurrentPage('login');
         }}
         onBackToLogin={() => setCurrentPage('login')}
       />
@@ -511,18 +496,7 @@ function App() {
   const handleCloseUpgradeModal = () => {
     setShowUpgradeModal(false);
     // Store dismissal in sessionStorage to prevent showing again this session
-    // We'll check subscription ID if available
-    try {
-      const subscriptionRes = ApiService.getCurrentSubscription();
-      subscriptionRes.then(res => {
-        const subscription = res?.subscription || res;
-        if (subscription?.id) {
-          sessionStorage.setItem(`upgrade_modal_dismissed_${subscription.id}`, 'true');
-        }
-      }).catch(() => {});
-    } catch (error) {
-      // Ignore errors
-    }
+    sessionStorage.setItem('upgrade_modal_dismissed', 'true');
   };
 
   return (

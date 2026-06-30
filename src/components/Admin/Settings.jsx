@@ -6,7 +6,7 @@ const AdminSettingsModal = ({ isOpen, onClose }) => {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [settings, setSettings] = useState({
-    siteName: 'JACS Property Management',
+    siteName: 'PMS Property Management System',
     siteDescription: 'Professional property management platform',
     maintenanceMode: false,
     emailNotifications: true,
@@ -71,7 +71,7 @@ const AdminSettingsModal = ({ isOpen, onClose }) => {
   const resetToDefaults = () => {
     if (window.confirm('Are you sure you want to reset all settings to default values?')) {
       setSettings({
-        siteName: 'JACS Property Management',
+        siteName: 'PMS Property Management System',
         siteDescription: 'Professional property management platform',
         maintenanceMode: false,
         emailNotifications: true,
@@ -106,7 +106,7 @@ const AdminSettingsModal = ({ isOpen, onClose }) => {
       const dataStr = JSON.stringify(backupData, null, 2);
       const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
       
-      const exportFileDefaultName = `jacs-backup-${new Date().toISOString().split('T')[0]}.json`;
+      const exportFileDefaultName = `pms-backup-${new Date().toISOString().split('T')[0]}.json`;
       
       const linkElement = document.createElement('a');
       linkElement.setAttribute('href', dataUri);

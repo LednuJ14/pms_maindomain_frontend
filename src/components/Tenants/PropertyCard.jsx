@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import defaultUnit from '../../assets/images/default_unit.png';
+const defaultUnit = 'https://res.cloudinary.com/do6wjhqur/image/upload/v1782797091/default_unit-BwbxJJFV_vjtpst.png';
 
 const PropertyCard = ({ images, location, price, imageAlt, onCardClick, bedrooms, bathrooms, area, propertyType, street, barangay, city, province }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -33,14 +33,23 @@ const PropertyCard = ({ images, location, price, imageAlt, onCardClick, bedrooms
       className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
       onClick={handleCardClick}
     >
-      <div className="relative h-60 bg-gray-200 flex items-center justify-center group">
+      <div className="relative h-60 bg-gray-100 flex items-center justify-center group">
         {/* Main Image */}
-        <img 
-          src={images && images.length > 0 ? images[currentImageIndex] : defaultUnit} 
-          alt={images && images.length > 0 ? `${imageAlt} - Image ${currentImageIndex + 1}` : 'Default Unit Image'}
-          className="w-full h-full object-cover rounded-lg"
-          onError={(e) => { e.target.src = defaultUnit; }}
-        />
+        {(() => {
+          const validImages = images && Array.isArray(images) ? images.filter(Boolean) : [];
+          const currentSrc = validImages.length > 0 ? validImages[currentImageIndex] : defaultUnit;
+          return (
+            <img 
+              src={currentSrc} 
+              alt={validImages.length > 0 ? `${imageAlt} - Image ${currentImageIndex + 1}` : 'Default Unit Image'}
+              className={`w-full h-full rounded-lg ${currentSrc === defaultUnit ? 'object-contain p-12 opacity-30 bg-white' : 'object-cover'}`}
+              onError={(e) => { 
+                e.target.src = defaultUnit; 
+                e.target.className = "w-full h-full rounded-lg object-contain p-12 opacity-30 bg-white"; 
+              }}
+            />
+          );
+        })()}
         
         {/* Navigation Arrows */}
         {images && images.length > 1 && (
