@@ -38,8 +38,8 @@ jobs:
       - name: Bundle size check
         run: |
           echo "📦 Bundle size:"
-          du -sh dist
-          SIZE=$(du -sm dist | cut -f1)
+          du -sh build
+          SIZE=$(du -sm build | cut -f1)
           if [ "$SIZE" -gt 10 ]; then
             echo "⚠️ Bundle exceeds 10MB"
           fi
@@ -53,7 +53,6 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     env:
       IMAGE_TAG: ${{ github.sha }}
-      BUILD_CONFIG: production
     outputs:
       build-time: ${{ steps.timer.outputs.time }}
     steps:
@@ -94,8 +93,6 @@ jobs:
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/pms-maindomain-frontend:main
             ${{ secrets.DOCKERHUB_USERNAME }}/pms-maindomain-frontend:${{ env.IMAGE_TAG }}
-          build-args: |
-            BUILD_CONFIG=${{ env.BUILD_CONFIG }}
           cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/pms-maindomain-frontend:buildcache
           cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/pms-maindomain-frontend:buildcache,mode=max
           platforms: linux/amd64
