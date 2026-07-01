@@ -48,7 +48,7 @@ const EmailVerification = ({ onVerificationComplete, onBack }) => {
 
   const attemptCrossBrowserVerification = async (emailAddress, verificationToken) => {
     // Create a BroadcastChannel to communicate with the original browser
-    const channel = new BroadcastChannel('jacs_verification');
+    const channel = new BroadcastChannel('pms_verification');
     setBroadcastChannel(channel);
     
     // Send verification data to original browser (if it's open in same browser)
@@ -256,7 +256,7 @@ const EmailVerification = ({ onVerificationComplete, onBack }) => {
       <div className="max-w-md w-full space-y-8">
         <div className="bg-white py-8 px-6 shadow-lg rounded-lg border border-gray-200">
           <div className="text-center mb-6">
-            <h1 className="text-xl font-bold text-black">JACS Cebu Property Management</h1>
+            <h1 className="text-xl font-bold text-black">PMS Property Management System</h1>
           </div>
           {renderContent()}
         </div>

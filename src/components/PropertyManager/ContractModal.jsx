@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import SignatureCanvas from 'react-signature-canvas';
 import api from '../../services/api';
 
 const ContractModal = ({ isOpen, onClose, inquiry, unit, onContractCreated, onContractSigned }) => {
@@ -10,6 +11,13 @@ const ContractModal = ({ isOpen, onClose, inquiry, unit, onContractCreated, onCo
   const [error, setError] = useState(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  
+  const [showSignaturePad, setShowSignaturePad] = useState(false);
+  const sigPad = useRef({});
+
+  const clearSignature = () => {
+    sigPad.current.clear();
+  };
   
   // Form state
   const [contractType, setContractType] = useState('quarterly');
@@ -201,13 +209,21 @@ const ContractModal = ({ isOpen, onClose, inquiry, unit, onContractCreated, onCo
     if (!contract?.id) return;
 
     try {
+      if (sigPad.current.isEmpty()) {
+        setError('Please provide your signature.');
+        return;
+      }
+      
       setSigning(true);
       setError(null);
       
-      const response = await api.signContractAsLandlord(contract.id);
+      const signature_base64 = sigPad.current.getCanvas().toDataURL('image/png');
+      
+      const response = await api.signContractAsLandlord(contract.id, { signature_base64 });
       
       if (response?.contract) {
         setContract(response.contract);
+        setShowSignaturePad(false);
         if (onContractSigned) {
           onContractSigned(response.contract);
         }
@@ -272,7 +288,7 @@ const ContractModal = ({ isOpen, onClose, inquiry, unit, onContractCreated, onCo
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent text-black"
                   required
                 >
-                  <option value="quarterly">6 months</option>
+                  <option value="quarterly">Quarterly (3 months)</option>
                   <option value="yearly">Yearly (12 months)</option>
                 </select>
               </div>
@@ -383,7 +399,7 @@ const ContractModal = ({ isOpen, onClose, inquiry, unit, onContractCreated, onCo
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent text-black"
                   required
                 >
-                  <option value="quarterly">6 months</option>
+                  <option value="quarterly">Quarterly (3 months)</option>
                   <option value="yearly">Yearly (12 months)</option>
                 </select>
               </div>
@@ -518,7 +534,7 @@ const ContractModal = ({ isOpen, onClose, inquiry, unit, onContractCreated, onCo
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-black">Contract Type</p>
-                  <p className="font-medium text-black">{contract.contract_type === 'quarterly' ? 'Quarterly (6 months)' : 'Yearly (12 months)'}</p>
+                  <p className="font-medium text-black">{contract.contract_type === 'quarterly' ? 'Quarterly (3 months)' : 'Yearly (12 months)'}</p>
                 </div>
                 <div>
                   <p className="text-sm text-black">Duration</p>
@@ -541,7 +557,6 @@ const ContractModal = ({ isOpen, onClose, inquiry, unit, onContractCreated, onCo
                   <p className="font-medium text-black">₱{parseFloat(contract.security_deposit || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                 </div>
               </div>
-
               {/* Signatures */}
               <div className="border-t pt-4">
                 <h3 className="font-semibold text-gray-900 mb-3">Signatures</h3>
@@ -613,7 +628,7 @@ const ContractModal = ({ isOpen, onClose, inquiry, unit, onContractCreated, onCo
                   Close
                 </button>
                 {/* Show Edit button if contract can be edited (draft status or neither party signed) */}
-                {contract.status === 'draft' && !contract.tenant_signed && !contract.landlord_signed && (
+                {contract.status === 'draft' && !contract.tenant_signed && !contract.landlord_signed && !showSignaturePad && (
                   <button
                     onClick={() => setIsEditing(true)}
                     className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -621,16 +636,52 @@ const ContractModal = ({ isOpen, onClose, inquiry, unit, onContractCreated, onCo
                     Edit Contract
                   </button>
                 )}
-                {!contract.landlord_signed && (
+                {!contract.landlord_signed && !showSignaturePad && (
                   <button
-                    onClick={handleSignContract}
-                    disabled={signing}
-                    className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={() => setShowSignaturePad(true)}
+                    className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
                   >
-                    {signing ? 'Signing...' : 'Sign as Landlord'}
+                    Review and Sign
                   </button>
                 )}
               </div>
+
+              {/* Signature Pad */}
+              {showSignaturePad && !contract.landlord_signed && (
+                <div className="border-t pt-4 mt-4 bg-gray-50 rounded-lg p-4">
+                  <h3 className="font-semibold text-gray-900 mb-2">Please sign below</h3>
+                  <div className="border-2 border-dashed border-gray-300 bg-white rounded-lg">
+                    <SignatureCanvas 
+                      penColor="black"
+                      canvasProps={{width: 500, height: 200, className: 'sigCanvas max-w-full'}}
+                      ref={sigPad}
+                    />
+                  </div>
+                  <div className="flex justify-between mt-4">
+                    <button 
+                      onClick={clearSignature}
+                      className="px-4 py-2 text-gray-600 hover:text-gray-900 transition-colors"
+                    >
+                      Clear Signature
+                    </button>
+                    <div className="space-x-3">
+                      <button
+                        onClick={() => setShowSignaturePad(false)}
+                        className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={handleSignContract}
+                        disabled={signing}
+                        className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50"
+                      >
+                        {signing ? 'Submitting...' : 'Confirm Signature'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           ) : null}
         </div>
@@ -640,4 +691,3 @@ const ContractModal = ({ isOpen, onClose, inquiry, unit, onContractCreated, onCo
 };
 
 export default ContractModal;
-

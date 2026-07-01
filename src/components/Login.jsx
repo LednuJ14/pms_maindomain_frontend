@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import ApiService from '../services/api';
-import Logo07 from '../assets/images/logo-07.png';
-
 const Login = ({ onLoginSuccess, onBackToMain, onSignUpClick, onForgotPasswordClick }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -213,12 +211,12 @@ const Login = ({ onLoginSuccess, onBackToMain, onSignUpClick, onForgotPasswordCl
                 isLoaded ? 'translate-x-0 opacity-100' : '-translate-x-8 opacity-0'
               }`}
             >
-              <div className="w-16 h-16 flex items-center justify-center transform transition-transform duration-300 hover:scale-110 hover:rotate-6 overflow-hidden">
-                <img src={Logo07} alt="JACS Logo" className="w-14 h-14 object-contain filter brightness-0 invert" />
+              <div className="w-16 h-16 bg-white rounded-xl flex items-center justify-center transform transition-transform duration-300 hover:scale-110 hover:rotate-6 shrink-0">
+                <span className="text-black font-black text-3xl">P</span>
               </div>
               <div>
-                <h1 className="text-xl font-bold">JACS</h1>
-                <p className="text-sm text-gray-300">Property Management</p>
+                <h1 className="text-xl font-bold">PMS</h1>
+                <p className="text-sm text-gray-300">Property Management System</p>
               </div>
             </div>
 
@@ -267,7 +265,7 @@ const Login = ({ onLoginSuccess, onBackToMain, onSignUpClick, onForgotPasswordCl
                 isLoaded ? 'translate-x-0 opacity-100' : '-translate-x-8 opacity-0'
               }`}
             >
-              <p>© 2024 JACS Property Management. All rights reserved.</p>
+              <p>© 2024 PMS Property Management System. All rights reserved.</p>
             </div>
           </div>
         </div>
@@ -288,8 +286,8 @@ const Login = ({ onLoginSuccess, onBackToMain, onSignUpClick, onForgotPasswordCl
                   </svg>
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold text-gray-900">JACS</h1>
-                  <p className="text-sm text-gray-600">Property Management</p>
+                  <h1 className="text-2xl font-bold text-gray-900">PMS</h1>
+                  <p className="text-sm text-gray-600">Property Management System</p>
                 </div>
               </div>
             </div>

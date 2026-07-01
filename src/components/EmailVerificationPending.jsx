@@ -8,7 +8,7 @@ const EmailVerificationPending = ({ email, onResendEmail, onBackToLogin, onVerif
 
   // Set up BroadcastChannel listener to receive verification from other browser tabs (same browser)
   useEffect(() => {
-    const channel = new BroadcastChannel('jacs_verification');
+    const channel = new BroadcastChannel('pms_verification');
     setBroadcastChannel(channel);
 
     channel.onmessage = async (event) => {
@@ -177,7 +177,7 @@ const EmailVerificationPending = ({ email, onResendEmail, onBackToLogin, onVerif
       <div className="max-w-md w-full space-y-8">
         <div className="bg-white py-8 px-6 shadow-lg rounded-lg border border-gray-200">
           <div className="text-center mb-6">
-            <h1 className="text-xl font-bold text-black">JACS Cebu Property Management</h1>
+            <h1 className="text-xl font-bold text-black">PMS Property Management System</h1>
           </div>
           
           <div className="text-center">
@@ -200,7 +200,7 @@ const EmailVerificationPending = ({ email, onResendEmail, onBackToLogin, onVerif
               <h3 className="text-sm font-medium text-black mb-3">Next Steps:</h3>
               <ul className="text-sm text-gray-700 space-y-1">
                 <li>• Check your email inbox</li>
-                <li>• Look for an email from JACS Cebu Property Management</li>
+                <li>• Look for an email from PMS Property Management System</li>
                 <li>• Click the verification link in the email</li>
                 <li>• If you don't see it, check your spam folder</li>
               </ul>

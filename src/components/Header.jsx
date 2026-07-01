@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import LogoImage from '../assets/images/logo-08.png';
 import TenantProfileDropdown from './Tenants/ProfileDropdown';
 import ManagerProfileDropdown from './PropertyManager/ProfileDropdown';
 import AdminProfileDropdown from './Admin/ProfileDropdown';
@@ -16,12 +15,12 @@ const Header = ({ currentPage, onPageChange, isAuthenticated, onLoginClick, user
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo Section */}
           <div className="flex items-center space-x-3 md:space-x-4">
-          <div className="w-16 h-16 md:w-18 md:h-18 rounded-xl flex items-center justify-center overflow-hidden shrink-0">
-              <img src={LogoImage} alt="JACS Logo" className="w-14 h-14 md:w-16 md:h-16 object-contain" />
+            <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shrink-0">
+              <span className="text-black font-black text-lg">P</span>
             </div>
             <div className="hidden sm:block">
-              <div className="text-lg md:text-xl font-black">JACS</div>
-              <div className="text-xs text-gray-400 font-medium">Joint Association & Community System - Cebu City</div>
+              <div className="text-lg md:text-xl font-black">PMS</div>
+              <div className="text-xs text-gray-400 font-medium">Property Management System - Cebu City</div>
             </div>
           </div>
 
@@ -31,41 +30,37 @@ const Header = ({ currentPage, onPageChange, isAuthenticated, onLoginClick, user
               <>
                 <button
                   onClick={() => onPageChange('admin-dashboard')}
-                  className={`px-4 py-2 rounded-xl font-semibold transition-all duration-300 text-sm ${
-                    currentPage === 'admin-dashboard'
-                      ? 'bg-white text-black shadow-lg'
-                      : 'text-gray-300 hover:text-white hover:bg-gray-800'
-                  }`}
+                  className={`px-4 py-2 rounded-xl font-semibold transition-all duration-300 text-sm ${currentPage === 'admin-dashboard'
+                    ? 'bg-white text-black shadow-lg'
+                    : 'text-gray-300 hover:text-white hover:bg-gray-800'
+                    }`}
                 >
                   Dashboard
                 </button>
                 <button
                   onClick={() => onPageChange('admin-property-approval')}
-                  className={`px-4 py-2 rounded-xl font-semibold transition-all duration-300 text-sm ${
-                    currentPage === 'admin-property-approval' || currentPage === 'admin-property-review'
-                      ? 'bg-white text-black shadow-lg'
-                      : 'text-gray-300 hover:text-white hover:bg-gray-800'
-                  }`}
+                  className={`px-4 py-2 rounded-xl font-semibold transition-all duration-300 text-sm ${currentPage === 'admin-property-approval' || currentPage === 'admin-property-review'
+                    ? 'bg-white text-black shadow-lg'
+                    : 'text-gray-300 hover:text-white hover:bg-gray-800'
+                    }`}
                 >
                   Property Approval
                 </button>
                 <button
                   onClick={() => onPageChange('admin-analytics')}
-                  className={`px-4 py-2 rounded-xl font-semibold transition-all duration-300 text-sm ${
-                    currentPage === 'admin-analytics'
-                      ? 'bg-white text-black shadow-lg'
-                      : 'text-gray-300 hover:text-white hover:bg-gray-800'
-                  }`}
+                  className={`px-4 py-2 rounded-xl font-semibold transition-all duration-300 text-sm ${currentPage === 'admin-analytics'
+                    ? 'bg-white text-black shadow-lg'
+                    : 'text-gray-300 hover:text-white hover:bg-gray-800'
+                    }`}
                 >
                   Analytics
                 </button>
                 <button
                   onClick={() => onPageChange('admin-subscription-management')}
-                  className={`px-4 py-2 rounded-xl font-semibold transition-all duration-300 text-sm ${
-                    currentPage === 'admin-subscription-management'
-                      ? 'bg-white text-black shadow-lg'
-                      : 'text-gray-300 hover:text-white hover:bg-gray-800'
-                  }`}
+                  className={`px-4 py-2 rounded-xl font-semibold transition-all duration-300 text-sm ${currentPage === 'admin-subscription-management'
+                    ? 'bg-white text-black shadow-lg'
+                    : 'text-gray-300 hover:text-white hover:bg-gray-800'
+                    }`}
                 >
                   Subscriptions
                 </button>
@@ -74,33 +69,42 @@ const Header = ({ currentPage, onPageChange, isAuthenticated, onLoginClick, user
               <>
                 <button
                   onClick={() => onPageChange('dashboard')}
-                  className={`px-4 py-2 rounded-xl font-semibold transition-all duration-300 text-sm ${
-                    currentPage === 'dashboard'
-                      ? 'bg-white text-black shadow-lg'
-                      : 'text-gray-300 hover:text-white hover:bg-gray-800'
-                  }`}
+                  className={`px-4 py-2 rounded-xl font-semibold transition-all duration-300 text-sm ${currentPage === 'dashboard'
+                    ? 'bg-white text-black shadow-lg'
+                    : 'text-gray-300 hover:text-white hover:bg-gray-800'
+                    }`}
                 >
                   Dashboard
                 </button>
-                <button
-                  onClick={() => onPageChange('rent-space')}
-                  className={`px-4 py-2 rounded-xl font-semibold transition-all duration-300 text-sm ${
-                    currentPage === 'rent-space'
+                {userRole === 'manager' && (
+                  <button
+                    onClick={() => onPageChange('manageProperty')}
+                    className={`px-4 py-2 rounded-xl font-semibold transition-all duration-300 text-sm ${currentPage === 'manageProperty'
                       ? 'bg-white text-black shadow-lg'
                       : 'text-gray-300 hover:text-white hover:bg-gray-800'
-                  }`}
+                      }`}
+                  >
+                    Manage Property
+                  </button>
+                )}
+                <button
+                  onClick={() => onPageChange('rent-space')}
+                  className={`px-4 py-2 rounded-xl font-semibold transition-all duration-300 text-sm ${currentPage === 'rent-space'
+                    ? 'bg-white text-black shadow-lg'
+                    : 'text-gray-300 hover:text-white hover:bg-gray-800'
+                    }`}
                 >
                   Rent Space
                 </button>
+
               </>
             )}
             <button
               onClick={() => onPageChange('about-contact')}
-              className={`px-4 py-2 rounded-xl font-semibold transition-all duration-300 text-sm ${
-                currentPage === 'about-contact'
-                  ? 'bg-white text-black shadow-lg'
-                  : 'text-gray-300 hover:text-white hover:bg-gray-800'
-              }`}
+              className={`px-4 py-2 rounded-xl font-semibold transition-all duration-300 text-sm ${currentPage === 'about-contact'
+                ? 'bg-white text-black shadow-lg'
+                : 'text-gray-300 hover:text-white hover:bg-gray-800'
+                }`}
             >
               About Us
             </button>
@@ -157,11 +161,10 @@ const Header = ({ currentPage, onPageChange, isAuthenticated, onLoginClick, user
                       onPageChange('admin-dashboard');
                       setIsMobileMenuOpen(false);
                     }}
-                    className={`px-4 py-3 rounded-xl font-semibold transition-all duration-300 text-left ${
-                      currentPage === 'admin-dashboard'
-                        ? 'bg-white text-black'
-                        : 'text-gray-300 hover:text-white hover:bg-gray-800'
-                    }`}
+                    className={`px-4 py-3 rounded-xl font-semibold transition-all duration-300 text-left ${currentPage === 'admin-dashboard'
+                      ? 'bg-white text-black'
+                      : 'text-gray-300 hover:text-white hover:bg-gray-800'
+                      }`}
                   >
                     Dashboard
                   </button>
@@ -170,11 +173,10 @@ const Header = ({ currentPage, onPageChange, isAuthenticated, onLoginClick, user
                       onPageChange('admin-analytics');
                       setIsMobileMenuOpen(false);
                     }}
-                    className={`px-4 py-3 rounded-xl font-semibold transition-all duration-300 text-left ${
-                      currentPage === 'admin-analytics'
-                        ? 'bg-white text-black'
-                        : 'text-gray-300 hover:text-white hover:bg-gray-800'
-                    }`}
+                    className={`px-4 py-3 rounded-xl font-semibold transition-all duration-300 text-left ${currentPage === 'admin-analytics'
+                      ? 'bg-white text-black'
+                      : 'text-gray-300 hover:text-white hover:bg-gray-800'
+                      }`}
                   >
                     Analytics
                   </button>
@@ -183,11 +185,10 @@ const Header = ({ currentPage, onPageChange, isAuthenticated, onLoginClick, user
                       onPageChange('admin-settings');
                       setIsMobileMenuOpen(false);
                     }}
-                    className={`px-4 py-3 rounded-xl font-semibold transition-all duration-300 text-left ${
-                      currentPage === 'admin-settings'
-                        ? 'bg-white text-black'
-                        : 'text-gray-300 hover:text-white hover:bg-gray-800'
-                    }`}
+                    className={`px-4 py-3 rounded-xl font-semibold transition-all duration-300 text-left ${currentPage === 'admin-settings'
+                      ? 'bg-white text-black'
+                      : 'text-gray-300 hover:text-white hover:bg-gray-800'
+                      }`}
                   >
                     Settings
                   </button>
@@ -196,11 +197,10 @@ const Header = ({ currentPage, onPageChange, isAuthenticated, onLoginClick, user
                       onPageChange('admin-property-approval');
                       setIsMobileMenuOpen(false);
                     }}
-                    className={`px-4 py-3 rounded-xl font-semibold transition-all duration-300 text-left ${
-                      currentPage === 'admin-property-approval' || currentPage === 'admin-property-review'
-                        ? 'bg-white text-black'
-                        : 'text-gray-300 hover:text-white hover:bg-gray-800'
-                    }`}
+                    className={`px-4 py-3 rounded-xl font-semibold transition-all duration-300 text-left ${currentPage === 'admin-property-approval' || currentPage === 'admin-property-review'
+                      ? 'bg-white text-black'
+                      : 'text-gray-300 hover:text-white hover:bg-gray-800'
+                      }`}
                   >
                     Property Approval
                   </button>
@@ -209,11 +209,10 @@ const Header = ({ currentPage, onPageChange, isAuthenticated, onLoginClick, user
                       onPageChange('admin-subscription-management');
                       setIsMobileMenuOpen(false);
                     }}
-                    className={`px-4 py-3 rounded-xl font-semibold transition-all duration-300 text-left ${
-                      currentPage === 'admin-subscription-management'
-                        ? 'bg-white text-black'
-                        : 'text-gray-300 hover:text-white hover:bg-gray-800'
-                    }`}
+                    className={`px-4 py-3 rounded-xl font-semibold transition-all duration-300 text-left ${currentPage === 'admin-subscription-management'
+                      ? 'bg-white text-black'
+                      : 'text-gray-300 hover:text-white hover:bg-gray-800'
+                      }`}
                   >
                     Subscriptions
                   </button>
@@ -225,27 +224,40 @@ const Header = ({ currentPage, onPageChange, isAuthenticated, onLoginClick, user
                       onPageChange('dashboard');
                       setIsMobileMenuOpen(false);
                     }}
-                    className={`px-4 py-3 rounded-xl font-semibold transition-all duration-300 text-left ${
-                      currentPage === 'dashboard'
-                        ? 'bg-white text-black'
-                        : 'text-gray-300 hover:text-white hover:bg-gray-800'
-                    }`}
+                    className={`px-4 py-3 rounded-xl font-semibold transition-all duration-300 text-left ${currentPage === 'dashboard'
+                      ? 'bg-white text-black'
+                      : 'text-gray-300 hover:text-white hover:bg-gray-800'
+                      }`}
                   >
                     Dashboard
                   </button>
+                  {userRole === 'manager' && (
+                    <button
+                      onClick={() => {
+                        onPageChange('manageProperty');
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className={`px-4 py-3 rounded-xl font-semibold transition-all duration-300 text-left ${currentPage === 'manageProperty'
+                        ? 'bg-white text-black'
+                        : 'text-gray-300 hover:text-white hover:bg-gray-800'
+                        }`}
+                    >
+                      Manage Property
+                    </button>
+                  )}
                   <button
                     onClick={() => {
                       onPageChange('rent-space');
                       setIsMobileMenuOpen(false);
                     }}
-                    className={`px-4 py-3 rounded-xl font-semibold transition-all duration-300 text-left ${
-                      currentPage === 'rent-space'
-                        ? 'bg-white text-black'
-                        : 'text-gray-300 hover:text-white hover:bg-gray-800'
-                    }`}
+                    className={`px-4 py-3 rounded-xl font-semibold transition-all duration-300 text-left ${currentPage === 'rent-space'
+                      ? 'bg-white text-black'
+                      : 'text-gray-300 hover:text-white hover:bg-gray-800'
+                      }`}
                   >
                     Rent Space
                   </button>
+
                 </>
               )}
               <button
@@ -253,11 +265,10 @@ const Header = ({ currentPage, onPageChange, isAuthenticated, onLoginClick, user
                   onPageChange('about-contact');
                   setIsMobileMenuOpen(false);
                 }}
-                className={`px-4 py-3 rounded-xl font-semibold transition-all duration-300 text-left ${
-                  currentPage === 'about-contact'
-                    ? 'bg-white text-black'
-                    : 'text-gray-300 hover:text-white hover:bg-gray-800'
-                }`}
+                className={`px-4 py-3 rounded-xl font-semibold transition-all duration-300 text-left ${currentPage === 'about-contact'
+                  ? 'bg-white text-black'
+                  : 'text-gray-300 hover:text-white hover:bg-gray-800'
+                  }`}
               >
                 About & Contact
               </button>

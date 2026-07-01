@@ -33,7 +33,7 @@ const LandingDashboard = ({ onPageChange }) => {
   // Data (monochrome, professional style)
   const services = [
     {
-      title: 'Property Management',
+      title: 'Property Management System',
       description:
         'End-to-end management for landlords and investors: tenant relations, rent collection, and maintenance oversight.',
       icon: 'home',

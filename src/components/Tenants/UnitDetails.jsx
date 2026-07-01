@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import defaultUnit from '../../assets/images/default_unit.png';
+const defaultUnit = 'https://res.cloudinary.com/do6wjhqur/image/upload/v1782797091/default_unit-BwbxJJFV_vjtpst.png';
 
 // Fix for default marker icon in Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -68,7 +68,7 @@ const UnitDetails = ({ property, onClose, onInquireNow = () => {} }) => {
           `https://nominatim.openstreetmap.org/search?format=json&q=${encodedAddress}&limit=1`,
           {
             headers: {
-              'User-Agent': 'JACS Property Platform'
+              'User-Agent': 'PMS Property Platform'
             }
           }
         );
@@ -228,12 +228,22 @@ const UnitDetails = ({ property, onClose, onInquireNow = () => {} }) => {
               {/* Image Gallery */}
               <div className="relative">
                 <div className="relative h-80 lg:h-96 bg-gray-200 rounded-xl overflow-hidden">
-                  <img
-                    src={images[currentImageIndex] || defaultUnit}
-                    alt={`${property.imageAlt || 'Unit'} - Image ${currentImageIndex + 1}`}
-                    className="w-full h-full object-cover"
-                    onError={(e) => { if (e.currentTarget.src !== defaultUnit) e.currentTarget.src = defaultUnit; }}
-                  />
+                  {(() => {
+                    const currentSrc = images[currentImageIndex] || defaultUnit;
+                    return (
+                      <img
+                        src={currentSrc}
+                        alt={`${property.imageAlt || 'Unit'} - Image ${currentImageIndex + 1}`}
+                        className={`w-full h-full ${currentSrc === defaultUnit ? 'object-contain p-12 opacity-30 bg-white' : 'object-cover'}`}
+                        onError={(e) => { 
+                          if (e.currentTarget.src !== defaultUnit) {
+                            e.currentTarget.src = defaultUnit; 
+                            e.currentTarget.className = "w-full h-full object-contain p-12 opacity-30 bg-white";
+                          }
+                        }}
+                      />
+                    );
+                  })()}
 
                   {images.length > 1 && (
                     <>

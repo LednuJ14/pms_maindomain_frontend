@@ -1,8 +1,9 @@
 import React, { useEffect, useMemo, useRef, useState, useCallback, memo } from 'react';
 import api from '../../services/api';
 import { getImageUrl } from '../../config/api';
-import defaultProfile from '../../assets/images/default_profile.png';
+const defaultProfile = 'https://res.cloudinary.com/do6wjhqur/image/upload/v1782797118/default_profile-vTumSY3j_faczsp.png';
 import TenantContractModal from './ContractModal';
+import PreQualificationWizard from './PreQualificationWizard';
 
 /**
  * Inquiries Component - Tenant Chat Interface
@@ -34,6 +35,11 @@ const Inquiries = ({ onClose, initialChat = null }) => {
   const [mediaUrls, setMediaUrls] = useState({}); // {attachmentId: blobUrl}
   const [lightboxImage, setLightboxImage] = useState(null);
   const [showContractModal, setShowContractModal] = useState(false);
+  
+  // Pre-qualification wizard state
+  const [showWizard, setShowWizard] = useState(false);
+  const [wizardData, setWizardData] = useState(null);
+  const [pendingInitialChat, setPendingInitialChat] = useState(null);
   
   // Refs for cleanup and tracking
   const mountedRef = useRef(true);
@@ -152,27 +158,20 @@ const Inquiries = ({ onClose, initialChat = null }) => {
         processedInitialChatRef.current = initialChatKey;
         setSelectedChatId(matchingChat.id);
         if (matchingChat.messages && matchingChat.messages.length > 0) {
-          // Existing conversation - offer to continue
           setMessage(`Hello! I'm still interested in ${initialChat.unitName || initialChat.property || 'this unit'}. Could you please provide an update?`);
         } else {
-          // New chat with no messages yet - ready to send first message
           setMessage(`Hello! I'm interested in ${initialChat.unitName || initialChat.property || 'this unit'}. Please provide more information about availability, viewing options, and pricing details. Thank you!`);
         }
-        // Focus the message input after a brief delay to ensure it's rendered
         setTimeout(() => {
           if (messageInputRef.current) {
             messageInputRef.current.focus();
           }
         }, 100);
       } else if (!loading && !creatingInquiryRef.current) {
-        // Chat doesn't exist and we've finished loading - create it
+        // Show wizard instead of immediately creating
         processedInitialChatRef.current = initialChatKey;
-        creatingInquiryRef.current = true;
-        try {
-          await createInquiry(initialChat);
-        } finally {
-          creatingInquiryRef.current = false;
-        }
+        setPendingInitialChat(initialChat);
+        setShowWizard(true);
       }
     };
     
@@ -263,6 +262,7 @@ const Inquiries = ({ onClose, initialChat = null }) => {
         avatar: managerProfileImage || null,
         avatarInitials: managerInitials,
         status: inquiry.status || 'pending',
+        pre_qualification: inquiry.pre_qualification || null,
         messages,
         inquiry
       };
@@ -310,13 +310,13 @@ const Inquiries = ({ onClose, initialChat = null }) => {
     
     // Old format: parse from message field
     if (inquiry.message) {
-      const tenantMessages = parseOldFormatMessages(inquiry.message, inquiry.id, 'tenant');
+      const tenantMessages = parseOldFormatMessages(inquiry.message, inquiry.id, 'tenant', inquiry.created_at);
       messages.push(...tenantMessages);
     }
     
     // Old format: parse from response_message field
     if (inquiry.response_message) {
-      const managerMessages = parseOldFormatMessages(inquiry.response_message, inquiry.id, 'manager');
+      const managerMessages = parseOldFormatMessages(inquiry.response_message, inquiry.id, 'manager', inquiry.created_at);
       messages.push(...managerMessages);
     }
     
@@ -344,7 +344,7 @@ const Inquiries = ({ onClose, initialChat = null }) => {
   /**
    * Parse old format messages with separators
    */
-  const parseOldFormatMessages = useCallback((text, inquiryId, sender) => {
+  const parseOldFormatMessages = useCallback((text, inquiryId, sender, inquiryCreatedAt) => {
     if (!text) return [];
     
     const messages = [];
@@ -378,7 +378,8 @@ const Inquiries = ({ onClose, initialChat = null }) => {
           .trim();
         
         if (cleanText && !isPlaceholderMessage(cleanText)) {
-          const timestamp = pendingTimestamp || Date.now() - (parts.length - idx) * 60000;
+          const fallbackTime = inquiryCreatedAt ? new Date(inquiryCreatedAt).getTime() : Date.now() - (parts.length - idx) * 60000;
+          const timestamp = pendingTimestamp || fallbackTime;
           messages.push({
             id: `${inquiryId}-${sender}-${idx}`,
             sender,
@@ -578,11 +579,12 @@ const Inquiries = ({ onClose, initialChat = null }) => {
       }
       
       // Use a placeholder message to create the inquiry
-      const placeholderMessage = "Inquiry started";
+      const placeholderMessage = "Inquiry started with pre-qualification details";
       const response = await api.startTenantInquiry(
         chatData.propertyId,
         placeholderMessage,
-        chatData.unitId || null
+        chatData.unitId || null,
+        wizardData || {}
       );
       
       if (!mountedRef.current) return;
@@ -1467,6 +1469,14 @@ const Inquiries = ({ onClose, initialChat = null }) => {
                               {hasText && (
                                 <div className="px-4 py-2">
                                   <p className="text-sm whitespace-pre-wrap break-words">{msg.text}</p>
+                                  {(msg.text === 'Inquiry started with pre-qualification details' && selectedChat.pre_qualification) && (
+                                    <div className="mt-3 p-3 bg-gray-100 text-gray-800 rounded text-xs space-y-1 border border-gray-300">
+                                      <p><span className="font-semibold">Income:</span> {selectedChat.pre_qualification.income || 'Not specified'}</p>
+                                      <p><span className="font-semibold">Employment:</span> {selectedChat.pre_qualification.employment || 'Not specified'}</p>
+                                      <p><span className="font-semibold">Pets:</span> {selectedChat.pre_qualification.pets ? 'Yes' : 'No'}</p>
+                                      <p><span className="font-semibold">Move-in Date:</span> {selectedChat.pre_qualification.move_in_date ? new Date(selectedChat.pre_qualification.move_in_date).toLocaleDateString() : 'Flexible'}</p>
+                                    </div>
+                                  )}
                                 </div>
                               )}
                               
@@ -1595,6 +1605,48 @@ const Inquiries = ({ onClose, initialChat = null }) => {
           </div>
         </div>
       </div>
+
+      {/* Pre-Qualification Wizard */}
+      {showWizard && pendingInitialChat && (
+        <PreQualificationWizard
+          property={{ title: pendingInitialChat.property }}
+          unit={pendingInitialChat.unitName ? { unitName: pendingInitialChat.unitName } : null}
+          onSubmit={async (data) => {
+            setShowWizard(false);
+            creatingInquiryRef.current = true;
+            try {
+              setLoading(true);
+              const response = await api.startTenantInquiry(
+                pendingInitialChat.propertyId,
+                "Inquiry started with pre-qualification details",
+                pendingInitialChat.unitId || null,
+                data
+              );
+              
+              if (response && response.inquiry) {
+                const updatedChats = await loadInquiries();
+                const newChat = updatedChats?.find(c => c.id === response.inquiry.id);
+                if (newChat) {
+                  setSelectedChatId(newChat.id);
+                  setMessage(`Hello! I'm interested in ${pendingInitialChat.unitName || pendingInitialChat.property || 'this unit'}. Please provide more information about availability, viewing options, and pricing details. Thank you!`);
+                  setTimeout(() => { if (messageInputRef.current) messageInputRef.current.focus(); }, 100);
+                }
+              }
+            } catch (err) {
+              setError(err.message || 'Failed to start inquiry');
+            } finally {
+              creatingInquiryRef.current = false;
+              setLoading(false);
+              setPendingInitialChat(null);
+            }
+          }}
+          onCancel={() => {
+            setShowWizard(false);
+            setPendingInitialChat(null);
+            if (chats.length === 0) onClose();
+          }}
+        />
+      )}
 
       {/* Contract Modal */}
       {showContractModal && selectedChat && (

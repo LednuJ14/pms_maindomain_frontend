@@ -1,8 +1,9 @@
 import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import api from '../../services/api';
 import { getImageUrl } from '../../config/api';
-import defaultProfile from '../../assets/images/default_profile.png';
+const defaultProfile = 'https://res.cloudinary.com/do6wjhqur/image/upload/v1782797118/default_profile-vTumSY3j_faczsp.png';
 import ContractModal from './ContractModal';
+import InquiryPipeline from './InquiryPipeline';
 
 const Inquiries = ({ isOpen, onClose }) => {
   const [activeTab, setActiveTab] = useState('chats');
@@ -57,7 +58,7 @@ const Inquiries = ({ isOpen, onClose }) => {
     }
     
     // Production
-    const baseDomain = process.env.REACT_APP_PORTAL_BASE_DOMAIN || 'jacs.com';
+    const baseDomain = process.env.REACT_APP_PORTAL_BASE_DOMAIN || 'pms.com';
     const protocol = process.env.REACT_APP_PORTAL_PROTOCOL || 'https';
     return `${protocol}://${cleanSubdomain}.${baseDomain}`;
   };
@@ -312,47 +313,65 @@ const Inquiries = ({ isOpen, onClose }) => {
             unitId: inquiry.unit_id || null,
             unitName: inquiry.unit_name,
             status: inquiry.status ? inquiry.status.toLowerCase() : inquiry.status,
+            pre_qualification: inquiry.pre_qualification || null,
             tenantProfileImage,
             tenantInitials,
           messages: (function(){
-            // Use new messages array from inquiry_messages table if available
+            const out = [];
+            
+            // 1. Fallback to old format parsing for backward compatibility (gets the initial message)
+            if (inquiry.message) {
+              const regex = /\n\n--- New Message(?: \[(\d{10,})\])? ---\n/g;
+              const src = String(inquiry.message || '');
+              const chunks = []; let last = 0; let m;
+              while ((m = regex.exec(src)) !== null) {
+                const txt = src.slice(last, m.index);
+                if (txt) chunks.push({ text: txt, ts: null });
+                chunks.push({ text: null, ts: m[1] ? Number(m[1]) : null });
+                last = m.index + m[0].length;
+              }
+              const tail = src.slice(last); if (tail) chunks.push({ text: tail, ts: null });
+              let pending = null; const now = Date.now();
+              for (const c of chunks) {
+                if (c.text === null) { pending = c.ts; continue; }
+                let cleanText = c.text.trim();
+                cleanText = cleanText.replace(/^---\s*New\s*Message\s*\[?\d*\]?\s*---\s*/i, '').trim();
+                if (!cleanText) continue;
+                out.push({ 
+                  id: `${inquiry.id}-t-${out.length}`, 
+                  sender: 'tenant', 
+                  text: cleanText, 
+                  time: formatMessageTime(pending ? new Date(pending) : new Date(inquiry.created_at || now)),
+                  created_at: pending ? new Date(pending).toISOString() : new Date(inquiry.created_at || now).toISOString()
+                });
+                pending = null;
+              }
+            }
+            
+            // 2. Use new messages array from inquiry_messages table if available
             if (inquiry.messages && Array.isArray(inquiry.messages) && inquiry.messages.length > 0) {
-              return inquiry.messages.map((msg, idx) => ({
+              const dbMessages = inquiry.messages.map((msg, idx) => ({
                 id: msg.id || `${inquiry.id}-${msg.sender}-${idx}`,
                 sender: msg.sender || (msg.sender_id === inquiry.property_manager_id ? 'manager' : 'tenant'),
                 text: msg.message || msg.text || '',
                 time: formatMessageTime(msg.created_at),
                 created_at: msg.created_at
               }));
+              out.push(...dbMessages);
             }
             
-            // Fallback to old format parsing for backward compatibility
-            const regex = /\n\n--- New Message(?: \[(\d{10,})\])? ---\n/g;
-            const src = String(inquiry.message || '');
-            const chunks = []; let last = 0; let m;
-            while ((m = regex.exec(src)) !== null) {
-              const txt = src.slice(last, m.index);
-              if (txt) chunks.push({ text: txt, ts: null });
-              chunks.push({ text: null, ts: m[1] ? Number(m[1]) : null });
-              last = m.index + m[0].length;
-            }
-            const tail = src.slice(last); if (tail) chunks.push({ text: tail, ts: null });
-            const out = []; let pending = null; const now = Date.now();
-            for (const c of chunks) {
-              if (c.text === null) { pending = c.ts; continue; }
-              let cleanText = c.text.trim();
-              cleanText = cleanText.replace(/^---\s*New\s*Message\s*\[?\d*\]?\s*---\s*/i, '').trim();
-              if (!cleanText) continue;
-              out.push({ 
-                id: `${inquiry.id}-t-${out.length}`, 
-                sender: 'tenant', 
-                text: cleanText, 
-                time: formatMessageTime(pending ? new Date(pending) : new Date(now)),
-                created_at: pending ? new Date(pending).toISOString() : new Date(now).toISOString()
-              });
-              pending = null;
-            }
-            return out;
+            // Filter duplicates by text/sender to prevent double rendering if a message is in both
+            const unique = [];
+            const seen = new Set();
+            out.forEach(msg => {
+              const key = `${msg.sender}-${msg.text}`;
+              if (!seen.has(key)) {
+                seen.add(key);
+                unique.push(msg);
+              }
+            });
+            
+            return unique;
           })(),
           inquiry: inquiry
           };
@@ -458,47 +477,65 @@ const Inquiries = ({ isOpen, onClose }) => {
             unitId: inquiry.unit_id || null,
             unitName: inquiry.unit_name,
             status: inquiry.status ? inquiry.status.toLowerCase() : inquiry.status,
+            pre_qualification: inquiry.pre_qualification || null,
             tenantProfileImage,
             tenantInitials,
             messages: (function(){
-              // Use new messages array from inquiry_messages table if available
+              const out = [];
+              
+              // 1. Fallback to old format parsing for backward compatibility (gets the initial message)
+              if (inquiry.message) {
+                const regex = /\n\n--- New Message(?: \[(\d{10,})\])? ---\n/g;
+                const src = String(inquiry.message || '');
+                const chunks = []; let last = 0; let m;
+                while ((m = regex.exec(src)) !== null) {
+                  const txt = src.slice(last, m.index);
+                  if (txt) chunks.push({ text: txt, ts: null });
+                  chunks.push({ text: null, ts: m[1] ? Number(m[1]) : null });
+                  last = m.index + m[0].length;
+                }
+                const tail = src.slice(last); if (tail) chunks.push({ text: tail, ts: null });
+                let pending = null; const now = Date.now();
+                for (const c of chunks) {
+                  if (c.text === null) { pending = c.ts; continue; }
+                  let cleanText = c.text.trim();
+                  cleanText = cleanText.replace(/^---\s*New\s*Message\s*\[?\d*\]?\s*---\s*/i, '').trim();
+                  if (!cleanText) continue;
+                  out.push({ 
+                    id: `${inquiry.id}-t-${out.length}`, 
+                    sender: 'tenant', 
+                    text: cleanText, 
+                    time: formatMessageTime(pending ? new Date(pending) : new Date(now)),
+                    created_at: pending ? new Date(pending).toISOString() : new Date(now).toISOString()
+                  });
+                  pending = null;
+                }
+              }
+              
+              // 2. Use new messages array from inquiry_messages table if available
               if (inquiry.messages && Array.isArray(inquiry.messages) && inquiry.messages.length > 0) {
-                return inquiry.messages.map((msg, idx) => ({
+                const dbMessages = inquiry.messages.map((msg, idx) => ({
                   id: msg.id || `${inquiry.id}-${msg.sender}-${idx}`,
                   sender: msg.sender || (msg.sender_id === inquiry.property_manager_id ? 'manager' : 'tenant'),
                   text: msg.message || msg.text || '',
                   time: formatMessageTime(msg.created_at),
                   created_at: msg.created_at
                 }));
+                out.push(...dbMessages);
               }
               
-              // Fallback to old format parsing for backward compatibility
-              const regex = /\n\n--- New Message(?: \[(\d{10,})\])? ---\n/g;
-              const src = String(inquiry.message || '');
-              const chunks = []; let last = 0; let m;
-              while ((m = regex.exec(src)) !== null) {
-                const txt = src.slice(last, m.index);
-                if (txt) chunks.push({ text: txt, ts: null });
-                chunks.push({ text: null, ts: m[1] ? Number(m[1]) : null });
-                last = m.index + m[0].length;
-              }
-              const tail = src.slice(last); if (tail) chunks.push({ text: tail, ts: null });
-              const out = []; let pending = null; const now = Date.now();
-              for (const c of chunks) {
-                if (c.text === null) { pending = c.ts; continue; }
-                let cleanText = c.text.trim();
-                cleanText = cleanText.replace(/^---\s*New\s*Message\s*\[?\d*\]?\s*---\s*/i, '').trim();
-                if (!cleanText) continue;
-                out.push({ 
-                  id: `${inquiry.id}-t-${out.length}`, 
-                  sender: 'tenant', 
-                  text: cleanText, 
-                  time: formatMessageTime(pending ? new Date(pending) : new Date(now)),
-                  created_at: pending ? new Date(pending).toISOString() : new Date(now).toISOString()
-                });
-                pending = null;
-              }
-              return out;
+              // Filter duplicates by text/sender to prevent double rendering if a message is in both
+              const unique = [];
+              const seen = new Set();
+              out.forEach(msg => {
+                const key = `${msg.sender}-${msg.text}`;
+                if (!seen.has(key)) {
+                  seen.add(key);
+                  unique.push(msg);
+                }
+              });
+              
+              return unique;
             })(),
             inquiry: inquiry
             };
@@ -1096,11 +1133,34 @@ const Inquiries = ({ isOpen, onClose }) => {
         >
           New Inquiries ({inquiries.filter(i => i.status === 'new' || i.status === 'pending').length})
         </button>
+        <button
+          onClick={() => setActiveTab('pipeline')}
+          className={`px-6 py-3 font-medium ${
+            activeTab === 'pipeline'
+              ? 'text-black border-b-2 border-black'
+              : 'text-gray-500 hover:text-black'
+          }`}
+        >
+          Pipeline CRM
+        </button>
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-hidden">
-        {activeTab === 'chats' ? (
+      <div className="flex-1 overflow-hidden p-4">
+        {activeTab === 'pipeline' ? (
+          <InquiryPipeline 
+            inquiries={inquiries} 
+            onInquiryUpdate={(updated) => {
+              setInquiries(prev => prev.map(i => i.id === updated.id ? updated : i));
+              // Reload all to get the updated list
+              loadInquiries();
+            }}
+            onInquiryClick={(item) => {
+              setSelectedChatId(item.id);
+              setActiveTab('chats');
+            }}
+          />
+        ) : activeTab === 'chats' ? (
           <div className="flex h-full">
             {/* Chat List */}
             <div className="w-1/3 border-r overflow-y-auto">
@@ -1482,6 +1542,14 @@ const Inquiries = ({ isOpen, onClose }) => {
                                 {hasText && (
                                   <div className="px-4 py-2">
                                     <p className="text-sm whitespace-pre-wrap break-words">{message.text || message.content}</p>
+                                    {((message.text || message.content) === 'Inquiry started with pre-qualification details' && selectedChat.pre_qualification) && (
+                                      <div className="mt-3 p-3 bg-gray-100 text-gray-800 rounded text-xs space-y-1 border border-gray-300">
+                                        <p><span className="font-semibold">Income:</span> {selectedChat.pre_qualification.income || 'Not specified'}</p>
+                                        <p><span className="font-semibold">Employment:</span> {selectedChat.pre_qualification.employment || 'Not specified'}</p>
+                                        <p><span className="font-semibold">Pets:</span> {selectedChat.pre_qualification.pets ? 'Yes' : 'No'}</p>
+                                        <p><span className="font-semibold">Move-in Date:</span> {selectedChat.pre_qualification.move_in_date ? new Date(selectedChat.pre_qualification.move_in_date).toLocaleDateString() : 'Flexible'}</p>
+                                      </div>
+                                    )}
                                   </div>
                                 )}
                                 

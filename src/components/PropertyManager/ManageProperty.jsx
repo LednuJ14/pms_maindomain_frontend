@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import api from '../../services/api';
-import defaultProperty from '../../assets/images/default_property.png';
+const defaultProperty = 'https://res.cloudinary.com/do6wjhqur/image/upload/v1782797109/default_property-C1acxcEH_e5dve8.png';
 import 'leaflet/dist/leaflet.css';
 
 // Fix for default marker icons in React-Leaflet
@@ -104,7 +104,7 @@ const reverseGeocode = async (lat, lng) => {
       `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`,
       {
         headers: {
-          'User-Agent': 'JACS Property Management System'
+          'User-Agent': 'PMS Property Management System'
         }
       }
     );
@@ -123,7 +123,7 @@ const forwardGeocode = async (query) => {
       `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1&countrycodes=ph`,
       {
         headers: {
-          'User-Agent': 'JACS Property Management System'
+          'User-Agent': 'PMS Property Management System'
         }
       }
     );
@@ -591,7 +591,7 @@ const ManageProperty = ({ onOpenManageUnits = () => {} }) => {
         const devPort = process.env.REACT_APP_SUBDOMAIN_PORT || '8080';
         return `http://localhost:${devPort}`;
       }
-      const baseDomain = process.env.REACT_APP_PORTAL_BASE_DOMAIN || 'jacs.com';
+      const baseDomain = process.env.REACT_APP_PORTAL_BASE_DOMAIN || 'pms.com';
       const protocol = process.env.REACT_APP_PORTAL_PROTOCOL || 'https';
       return `${protocol}://${baseDomain}`;
     }
@@ -602,8 +602,8 @@ const ManageProperty = ({ onOpenManageUnits = () => {} }) => {
       return `http://${clean}.localhost:${devPort}`;
     }
     
-    // Production: use actual subdomain (e.g., pat.jacs.com)
-    const baseDomain = process.env.REACT_APP_PORTAL_BASE_DOMAIN || 'jacs.com';
+    // Production: use actual subdomain (e.g., pat.pms.com)
+    const baseDomain = process.env.REACT_APP_PORTAL_BASE_DOMAIN || 'pms.com';
     const protocol = process.env.REACT_APP_PORTAL_PROTOCOL || 'https';
     return `${protocol}://${clean}.${baseDomain}`;
   };
@@ -621,7 +621,7 @@ const ManageProperty = ({ onOpenManageUnits = () => {} }) => {
     }
     
     // Production: show actual subdomain
-    const baseDomain = process.env.REACT_APP_PORTAL_BASE_DOMAIN || 'jacs.com';
+    const baseDomain = process.env.REACT_APP_PORTAL_BASE_DOMAIN || 'pms.com';
     return `${clean}.${baseDomain}`;
   };
 
@@ -1406,7 +1406,7 @@ const ManageProperty = ({ onOpenManageUnits = () => {} }) => {
           <div className="relative p-8">
             <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between space-y-4 lg:space-y-0">
               <div>
-                <h1 className="text-3xl font-bold mb-2">Property Management</h1>
+                <h1 className="text-3xl font-bold mb-2">Property Management System</h1>
                 <p className="text-gray-300 text-lg">Manage your property and subdomains</p>
                 <div className="flex items-center space-x-6 mt-4">
                   <div className="flex items-center space-x-2">
@@ -1660,12 +1660,15 @@ const ManageProperty = ({ onOpenManageUnits = () => {} }) => {
             {currentPageItems.map((building) => (
               <div key={building.id} className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300">
                 {/* Building Image */}
-                <div className="relative h-60 bg-gray-200 overflow-hidden">
+                <div className="relative h-60 bg-gray-100 overflow-hidden flex items-center justify-center">
                   <img
                     src={getImageSrc(building.image)}
                     alt={building.buildingName}
-                    className="w-full h-full object-cover"
-                    onError={(e) => { e.target.src = defaultProperty; }}
+                    className={`w-full h-full ${!building.image || getImageSrc(building.image) === defaultProperty ? 'object-contain p-12 opacity-30' : 'object-cover'}`}
+                    onError={(e) => { 
+                      e.target.src = defaultProperty; 
+                      e.target.className = "w-full h-full object-contain p-12 opacity-30"; 
+                    }}
                   />
                   <div className="absolute top-3 left-3">
                     <input
@@ -1712,9 +1715,9 @@ const ManageProperty = ({ onOpenManageUnits = () => {} }) => {
                   <div className="mb-4">
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-500">Subdomain:</span>
-                      {building.status === 'pending_approval' || building.status === 'rejected' || (building.status || '').toLowerCase() === 'rejected' ? (
+                      {building.status === 'pending_approval' || ['rejected', 'declined', 'disapproved'].includes((building.status || '').toLowerCase()) ? (
                         <span className="text-sm font-medium text-gray-400 cursor-not-allowed">
-                          {getSubdomainDisplay(building.subdomain)} {building.status === 'rejected' || (building.status || '').toLowerCase() === 'rejected' ? '(Rejected)' : '(Pending Approval)'}
+                          {getSubdomainDisplay(building.subdomain)} {['rejected', 'declined', 'disapproved'].includes((building.status || '').toLowerCase()) ? '(Declined/Rejected)' : '(Pending Approval)'}
                         </span>
                       ) : (
                       <a 
@@ -1745,8 +1748,8 @@ const ManageProperty = ({ onOpenManageUnits = () => {} }) => {
 
                   {/* Contact Info */}
                   <div className="mb-4 text-sm text-gray-600">
-                    <p><span className="font-medium">Contact:</span> {building.contactPerson}</p>
-                    <p><span className="font-medium">Email:</span> {building.contactEmail}</p>
+                    <p><span className="font-medium">Contact:</span> {building.contactPerson || building.owner?.name || 'Not provided'}</p>
+                    <p><span className="font-medium">Email:</span> {building.contactEmail || building.owner?.email || 'Not provided'}</p>
                   </div>
 
                   {/* Registration and Last Updated */}
@@ -1865,7 +1868,7 @@ const ManageProperty = ({ onOpenManageUnits = () => {} }) => {
                         className="flex-1 px-4 py-3 border border-gray-300 rounded-l-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                       required
                     />
-                      <span className="px-4 py-3 bg-gray-100 border border-l-0 border-gray-300 rounded-r-xl text-gray-600 font-medium">.jacs.com</span>
+                      <span className="px-4 py-3 bg-gray-100 border border-l-0 border-gray-300 rounded-r-xl text-gray-600 font-medium">.pms.com</span>
                   </div>
                     <p className="text-xs text-gray-500 mt-1">This will be your property's website URL</p>
                 </div>
@@ -2546,7 +2549,7 @@ const ManageProperty = ({ onOpenManageUnits = () => {} }) => {
                           className="flex-1 px-4 py-3 border border-gray-300 rounded-l-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                           required
                         />
-                        <span className="px-4 py-3 bg-gray-100 border border-l-0 border-gray-300 rounded-r-xl text-gray-600 font-medium">.jacs.com</span>
+                        <span className="px-4 py-3 bg-gray-100 border border-l-0 border-gray-300 rounded-r-xl text-gray-600 font-medium">.pms.com</span>
                 </div>
                       <p className="text-xs text-gray-500 mt-1">This will be your property's website URL</p>
               </div>
@@ -3143,8 +3146,11 @@ const ManageProperty = ({ onOpenManageUnits = () => {} }) => {
                         <img 
                           src={mainImg} 
                           alt={detailsBuilding.buildingName} 
-                          className="w-full h-full object-cover rounded-xl border border-gray-200 shadow-lg" 
-                          onError={(e) => { e.target.src = defaultProperty; }}
+                          className={`w-full h-full rounded-xl border border-gray-200 shadow-lg ${mainImg === defaultProperty ? 'object-contain p-12 opacity-30 bg-white' : 'object-cover'}`} 
+                          onError={(e) => { 
+                            e.target.src = defaultProperty; 
+                            e.target.className = "w-full h-full rounded-xl border border-gray-200 shadow-lg object-contain p-12 opacity-30 bg-white"; 
+                          }}
                         />
                       );
                     })()}
@@ -3222,9 +3228,9 @@ const ManageProperty = ({ onOpenManageUnits = () => {} }) => {
                       </svg>
                       Portal Access
                     </h3>
-                    {detailsBuilding.status === 'pending_approval' || detailsBuilding.status === 'rejected' || (detailsBuilding.status || '').toLowerCase() === 'rejected' ? (
+                    {detailsBuilding.status === 'pending_approval' || ['rejected', 'declined', 'disapproved'].includes((detailsBuilding.status || '').toLowerCase()) ? (
                       <span className="text-sm font-medium text-gray-500">
-                        {getSubdomainDisplay(detailsBuilding.subdomain)} {detailsBuilding.status === 'rejected' || (detailsBuilding.status || '').toLowerCase() === 'rejected' ? '(Rejected)' : '(Pending Approval)'}
+                        {getSubdomainDisplay(detailsBuilding.subdomain)} {['rejected', 'declined', 'disapproved'].includes((detailsBuilding.status || '').toLowerCase()) ? '(Declined/Rejected)' : '(Pending Approval)'}
                       </span>
                     ) : (
                       <a 
@@ -3293,17 +3299,17 @@ const ManageProperty = ({ onOpenManageUnits = () => {} }) => {
                     Contact Information
                   </h3>
                   <div className="space-y-3">
-              <div>
+                    <div>
                       <span className="text-sm text-gray-600">Contact Person</span>
-                      <p className="font-semibold text-gray-900">{detailsBuilding.contactPerson}</p>
-              </div>
-              <div>
+                      <p className="font-semibold text-gray-900">{detailsBuilding.contactPerson || detailsBuilding.owner?.name || 'Not provided'}</p>
+                    </div>
+                    <div>
                       <span className="text-sm text-gray-600">Email</span>
-                      <p className="font-semibold text-gray-900">{detailsBuilding.contactEmail}</p>
-              </div>
+                      <p className="font-semibold text-gray-900">{detailsBuilding.contactEmail || detailsBuilding.owner?.email || 'Not provided'}</p>
+                    </div>
                     <div>
                       <span className="text-sm text-gray-600">Phone</span>
-                      <p className="font-semibold text-gray-900">{detailsBuilding.contactPhone}</p>
+                      <p className="font-semibold text-gray-900">{detailsBuilding.contactPhone || detailsBuilding.owner?.phone || 'Not provided'}</p>
                     </div>
                   </div>
                 </div>
@@ -3323,7 +3329,11 @@ const ManageProperty = ({ onOpenManageUnits = () => {} }) => {
                     </div>
                     <div>
                       <span className="text-sm text-gray-600">Approved</span>
-                      <p className="font-semibold text-gray-900">{formatDate(detailsBuilding.approvalDate) || 'Not approved yet'}</p>
+                      <p className="font-semibold text-gray-900">
+                        {detailsBuilding.status === 'active' || detailsBuilding.status === 'approved' 
+                          ? formatDate(detailsBuilding.approvalDate || detailsBuilding.lastUpdated) 
+                          : (formatDate(detailsBuilding.approvalDate) || 'Not approved yet')}
+                      </p>
                     </div>
                     <div>
                       <span className="text-sm text-gray-600">Last Updated</span>

@@ -159,10 +159,11 @@ const SignUp = ({ onSignUpSuccess, onBackToLogin }) => {
           setErrorMessage('Passwords do not match.');
           return false;
         }
-        if (!passwordStrength.isValid) {
-          setErrorMessage('Password must be at least 8 characters, include a number, at least one capital letter, and a special character.');
-          return false;
-        }
+        // Password strength check disabled
+        // if (!passwordStrength.isValid) {
+        //   setErrorMessage('Password must be at least 8 characters, include a number, at least one capital letter, and a special character.');
+        //   return false;
+        // }
         // Validate additional info fields (Date of Birth and Address are on Step 2)
         if (!formData.dateOfBirth || !formData.dateOfBirth.trim()) {
           setErrorMessage('Date of birth is required.');
@@ -615,7 +616,7 @@ const SignUp = ({ onSignUpSuccess, onBackToLogin }) => {
             <button type="button" className="font-semibold text-black hover:text-gray-700 transition-colors">
               Privacy Policy
             </button>
-            . I understand that JACS will use my information to provide property management services.
+            . I understand that PMS will use my information to provide property management services.
           </span>
         </label>
       </div>
@@ -681,8 +682,8 @@ const SignUp = ({ onSignUpSuccess, onBackToLogin }) => {
                 </svg>
               </div>
               <div>
-                <h1 className="text-xl font-bold">JACS</h1>
-                <p className="text-sm text-gray-300">Property Management</p>
+                <h1 className="text-xl font-bold">PMS</h1>
+                <p className="text-sm text-gray-300">Property Management System</p>
               </div>
             </div>
 
@@ -697,7 +698,7 @@ const SignUp = ({ onSignUpSuccess, onBackToLogin }) => {
                   Join Our Community
                 </h2>
                 <p className="text-lg text-gray-300 leading-relaxed">
-                  Create your account and become part of the JACS Property Management family. Start your journey with us today.
+                  Create your account and become part of the PMS Property Management System family. Start your journey with us today.
                 </p>
               </div>
               
@@ -731,7 +732,7 @@ const SignUp = ({ onSignUpSuccess, onBackToLogin }) => {
                 isLoaded ? 'translate-x-0 opacity-100' : '-translate-x-8 opacity-0'
               }`}
             >
-              <p>© 2024 JACS Property Management. All rights reserved.</p>
+              <p>© 2024 PMS Property Management System. All rights reserved.</p>
             </div>
           </div>
         </div>
@@ -752,8 +753,8 @@ const SignUp = ({ onSignUpSuccess, onBackToLogin }) => {
                   </svg>
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold text-gray-900">JACS</h1>
-                  <p className="text-sm text-gray-600">Property Management</p>
+                  <h1 className="text-2xl font-bold text-gray-900">PMS</h1>
+                  <p className="text-sm text-gray-600">Property Management System</p>
                 </div>
               </div>
             </div>
@@ -768,7 +769,7 @@ const SignUp = ({ onSignUpSuccess, onBackToLogin }) => {
                 <h2 className="text-3xl font-bold text-gray-900 mb-2 bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
                   Create Account
                 </h2>
-                <p className="text-gray-600">Join thousands who trust JACS for property management</p>
+                <p className="text-gray-600">Join thousands who trust PMS for property management</p>
               </div>
 
               {/* Step Indicator */}
