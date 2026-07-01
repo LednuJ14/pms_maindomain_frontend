@@ -1715,9 +1715,9 @@ const ManageProperty = ({ onOpenManageUnits = () => {} }) => {
                   <div className="mb-4">
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-500">Subdomain:</span>
-                      {building.status === 'pending_approval' || building.status === 'rejected' || (building.status || '').toLowerCase() === 'rejected' ? (
+                      {building.status === 'pending_approval' || ['rejected', 'declined', 'disapproved'].includes((building.status || '').toLowerCase()) ? (
                         <span className="text-sm font-medium text-gray-400 cursor-not-allowed">
-                          {getSubdomainDisplay(building.subdomain)} {building.status === 'rejected' || (building.status || '').toLowerCase() === 'rejected' ? '(Rejected)' : '(Pending Approval)'}
+                          {getSubdomainDisplay(building.subdomain)} {['rejected', 'declined', 'disapproved'].includes((building.status || '').toLowerCase()) ? '(Declined/Rejected)' : '(Pending Approval)'}
                         </span>
                       ) : (
                       <a 
@@ -3228,9 +3228,9 @@ const ManageProperty = ({ onOpenManageUnits = () => {} }) => {
                       </svg>
                       Portal Access
                     </h3>
-                    {detailsBuilding.status === 'pending_approval' || detailsBuilding.status === 'rejected' || (detailsBuilding.status || '').toLowerCase() === 'rejected' ? (
+                    {detailsBuilding.status === 'pending_approval' || ['rejected', 'declined', 'disapproved'].includes((detailsBuilding.status || '').toLowerCase()) ? (
                       <span className="text-sm font-medium text-gray-500">
-                        {getSubdomainDisplay(detailsBuilding.subdomain)} {detailsBuilding.status === 'rejected' || (detailsBuilding.status || '').toLowerCase() === 'rejected' ? '(Rejected)' : '(Pending Approval)'}
+                        {getSubdomainDisplay(detailsBuilding.subdomain)} {['rejected', 'declined', 'disapproved'].includes((detailsBuilding.status || '').toLowerCase()) ? '(Declined/Rejected)' : '(Pending Approval)'}
                       </span>
                     ) : (
                       <a 

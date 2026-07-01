@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import SignatureCanvas from 'react-signature-canvas';
 import api from '../../services/api';
 
 const TenantContractModal = ({ isOpen, onClose, inquiry, onContractSigned }) => {
@@ -6,6 +7,13 @@ const TenantContractModal = ({ isOpen, onClose, inquiry, onContractSigned }) => 
   const [loading, setLoading] = useState(false);
   const [signing, setSigning] = useState(false);
   const [error, setError] = useState(null);
+  
+  const [showSignaturePad, setShowSignaturePad] = useState(false);
+  const sigPad = useRef({});
+
+  const clearSignature = () => {
+    sigPad.current.clear();
+  };
 
   useEffect(() => {
     if (isOpen && inquiry) {
@@ -38,13 +46,21 @@ const TenantContractModal = ({ isOpen, onClose, inquiry, onContractSigned }) => 
     if (!contract?.id) return;
 
     try {
+      if (sigPad.current.isEmpty()) {
+        setError('Please provide your signature.');
+        return;
+      }
+      
       setSigning(true);
       setError(null);
       
-      const response = await api.signContractAsTenant(contract.id);
+      const signature_base64 = sigPad.current.getCanvas().toDataURL('image/png');
+      
+      const response = await api.signContractAsTenant(contract.id, { signature_base64 });
       
       if (response?.contract) {
         setContract(response.contract);
+        setShowSignaturePad(false);
         if (onContractSigned) {
           onContractSigned(response.contract);
         }
@@ -129,7 +145,7 @@ const TenantContractModal = ({ isOpen, onClose, inquiry, onContractSigned }) => 
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-black">Contract Type</p>
-                  <p className="font-medium text-black">{contract.contract_type === 'quarterly' ? 'Quarterly (6 months)' : 'Yearly (12 months)'}</p>
+                  <p className="font-medium text-black">{contract.contract_type === 'quarterly' ? 'Quarterly (3 months)' : 'Yearly (12 months)'}</p>
                 </div>
                 <div>
                   <p className="text-sm text-black">Duration</p>
@@ -210,7 +226,7 @@ const TenantContractModal = ({ isOpen, onClose, inquiry, onContractSigned }) => 
               )}
 
               {error && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4 mt-4">
                   <p className="text-red-800 text-sm">{error}</p>
                 </div>
               )}
@@ -223,16 +239,52 @@ const TenantContractModal = ({ isOpen, onClose, inquiry, onContractSigned }) => 
                 >
                   Close
                 </button>
-                {!contract.tenant_signed && (
+                {!contract.tenant_signed && !showSignaturePad && (
                   <button
-                    onClick={handleSignContract}
-                    disabled={signing}
-                    className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={() => setShowSignaturePad(true)}
+                    className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
                   >
-                    {signing ? 'Signing...' : 'Sign Contract'}
+                    Review and Sign
                   </button>
                 )}
               </div>
+
+              {/* Signature Pad */}
+              {showSignaturePad && !contract.tenant_signed && (
+                <div className="border-t pt-4 mt-4 bg-gray-50 rounded-lg p-4">
+                  <h3 className="font-semibold text-gray-900 mb-2">Please sign below</h3>
+                  <div className="border-2 border-dashed border-gray-300 bg-white rounded-lg">
+                    <SignatureCanvas 
+                      penColor="black"
+                      canvasProps={{width: 500, height: 200, className: 'sigCanvas max-w-full'}}
+                      ref={sigPad}
+                    />
+                  </div>
+                  <div className="flex justify-between mt-4">
+                    <button 
+                      onClick={clearSignature}
+                      className="px-4 py-2 text-gray-600 hover:text-gray-900 transition-colors"
+                    >
+                      Clear Signature
+                    </button>
+                    <div className="space-x-3">
+                      <button
+                        onClick={() => setShowSignaturePad(false)}
+                        className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={handleSignContract}
+                        disabled={signing}
+                        className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50"
+                      >
+                        {signing ? 'Submitting...' : 'Confirm Signature'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -242,4 +294,3 @@ const TenantContractModal = ({ isOpen, onClose, inquiry, onContractSigned }) => 
 };
 
 export default TenantContractModal;
-

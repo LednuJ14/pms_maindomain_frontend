@@ -566,10 +566,16 @@ class ApiService {
     });
   }
 
-  async startTenantInquiry(propertyId, message, unitId = null) {
+  async startTenantInquiry(propertyId, message, unitId = null, options = {}) {
     return this.request(API_ENDPOINTS.TENANT.START_INQUIRY, {
       method: 'POST',
-      body: JSON.stringify({ property_id: propertyId, unit_id: unitId, message })
+      body: JSON.stringify({ 
+        property_id: propertyId, 
+        unit_id: unitId, 
+        message,
+        pre_qualification: options.pre_qualification,
+        viewing_schedule: options.viewing_schedule
+      })
     });
   }
 
