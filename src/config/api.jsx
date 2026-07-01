@@ -12,8 +12,25 @@ const getBackendProtocol = () => {
 };
 
 const BACKEND_PROTOCOL = getBackendProtocol();
-const API_BASE_URL = process.env.REACT_APP_API_URL || `${BACKEND_PROTOCOL}//localhost:5000/api`;
-const BACKEND_BASE_URL = process.env.REACT_APP_BACKEND_URL || `${BACKEND_PROTOCOL}//localhost:5000`;
+let API_BASE_URL = process.env.REACT_APP_API_URL || `${BACKEND_PROTOCOL}//localhost:5000/api`;
+let BACKEND_BASE_URL = process.env.REACT_APP_BACKEND_URL || `${BACKEND_PROTOCOL}//localhost:5000`;
+
+// CRITICAL FIX: If the code was built with localhost env vars but is running on a live domain,
+// automatically rewrite the base URLs to use the live domain instead of failing.
+if (typeof window !== 'undefined') {
+  const hostname = window.location.hostname;
+  const isLocalhost = hostname === 'localhost' || hostname.endsWith('.localhost') || hostname === '127.0.0.1' || hostname.match(/^192\.168\./) || hostname.match(/^10\./);
+  
+  if (!isLocalhost) {
+    const protocol = window.location.protocol;
+    if (API_BASE_URL.includes('localhost') || API_BASE_URL.includes('127.0.0.1')) {
+      API_BASE_URL = `${protocol}//${hostname}/api`;
+    }
+    if (BACKEND_BASE_URL.includes('localhost') || BACKEND_BASE_URL.includes('127.0.0.1')) {
+      BACKEND_BASE_URL = `${protocol}//${hostname}`;
+    }
+  }
+}
 
 // Helper function to get full image URL
 export const getImageUrl = (imagePath) => {
